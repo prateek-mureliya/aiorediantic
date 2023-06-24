@@ -3,14 +3,14 @@ from pydantic import BaseModel, create_model
 import aioredis
 
 
-from aiorediantic.config import RedisConfig, RedisScheme
+from aiorediantic.config import RedisConfig
 from .redis_version import RedisVersion
+from .redis_client import RedisClient
 
 
 class RedisModel(BaseModel):
-    _client: Optional[aioredis.Redis] = None
     _redisKey: Optional[str] = None
-    config: RedisConfig
+    redisClient: RedisClient
     keyFormat: str
     vars: BaseModel = BaseModel()
     redisVersion: RedisVersion = RedisVersion(major=1, minor=0, patch=0)
@@ -21,41 +21,11 @@ class RedisModel(BaseModel):
 
     @property
     def client(self) -> aioredis.Redis:
-        if not self._client:
-            kwargs: dict[str, Any] = {
-                "host": self.config.host,
-                "port": self.config.port,
-                "db": self.config.db,
-                "username": self.config.username,
-                "password": self.config.password,
-                "client_name": self.config.client_name,
-                "socket_type": self.config.socket_type,
-                "socket_timeout": self.config.socket_timeout,
-                "socket_connect_timeout": self.config.socket_connect_timeout,
-                "socket_keepalive": self.config.socket_keepalive,
-                "socket_keepalive_options": self.config.socket_keepalive_options,
-                "socket_read_size": self.config.socket_read_size,
-                "encoding": self.config.encoding,
-                "encoding_errors": self.config.encoding_errors,
-                "decode_responses": self.config.decode_responses,
-                "retry_on_timeout": self.config.retry_on_timeout,
-                "max_connections": self.config.max_connections,
-                "health_check_interval": self.config.health_check_interval,
-            }
-            if self.config.scheme == RedisScheme.rediss:
-                kwargs.update(
-                    {
-                        "ssl_keyfile": self.config.ssl_keyfile,
-                        "ssl_certfile": self.config.ssl_certfile,
-                        "ssl_cert_reqs": self.config.ssl_cert_reqs,
-                        "ssl_ca_certs": self.config.ssl_ca_certs,
-                        "ssl_check_hostname": self.config.ssl_check_hostname,
-                    }
-                )
-            self._client = aioredis.from_url(  # pyright: ignore
-                self.config.scheme, **kwargs
-            )
-        return self._client
+        return self.redisClient.client
+
+    @property
+    def config(self) -> RedisConfig:
+        return self.redisClient.config
 
     @property
     def redisKey(self) -> str:
