@@ -1,10 +1,10 @@
 from typing import Any, Optional, Type
 from pydantic import BaseModel, create_model
+from packaging.version import Version
 import aioredis
 
 
 from aiorediantic.config import RedisConfig
-from .redis_version import RedisVersion
 from .redis_client import RedisClient
 
 
@@ -13,7 +13,7 @@ class RedisModel(BaseModel):
     redisClient: RedisClient
     keyFormat: str
     vars: BaseModel = BaseModel()
-    redisVersion: RedisVersion = RedisVersion(major=1, minor=0, patch=0)
+    redisVersion: Version = Version("1.0.0")
 
     class Config:
         arbitrary_types_allowed = True
@@ -37,8 +37,5 @@ class RedisModel(BaseModel):
         dynamicModel: Type[BaseModel] = create_model("vars", **kwargs)
         self.vars = dynamicModel()
 
-        parts: list[str] = self.config.redis_version.split(".")
-        self.redisVersion = RedisVersion(
-            major=int(parts[0]), minor=int(parts[1]), patch=int(parts[2])
-        )
+        self.redisVersion = Version(self.config.redis_version)
         return self
