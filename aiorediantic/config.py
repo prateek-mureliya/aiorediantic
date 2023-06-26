@@ -1,7 +1,7 @@
 """Module containing the main config classes"""
 from typing import Optional, Union, Mapping
 from enum import Enum
-import re
+from packaging.version import Version
 
 from pydantic import BaseModel, validator
 
@@ -41,9 +41,8 @@ class RedisConfig(BaseModel):
     ssl_check_hostname: bool = False
 
     @validator("redis_version")
-    def name_must_contain_space(cls, version: str) -> str:
-        if not re.search("^\\d{1,3}.\\d{1,3}.\\d{1,3}$", version):
-            raise ValueError("Invalid redis version")
+    def redis_version_must_be_validate(cls, version: str) -> str:
+        Version(version)
         return version
 
     class Config:
