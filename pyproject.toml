@@ -18,6 +18,7 @@ pytest-asyncio = "^0.21.0"
 
 [tool.poetry.group.docs.dependencies]
 mkdocs = "^1.4.3"
+mkdocs-material = "^9.1.17"
 
 [tool.pytest.ini_options]
 minversion = "6.0"

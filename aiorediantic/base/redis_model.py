@@ -34,7 +34,7 @@ class RedisModel(BaseModel):
         return self._redisKey
 
     def __call__(self, **kwargs: Any):
-        dynamicModel: Type[BaseModel] = create_model("vars", **kwargs)
+        dynamicModel: Type[BaseModel] = create_model("vars", **kwargs)  # type: ignore
         self.vars = dynamicModel()
 
         self.redisVersion = Version(self.config.redis_version)

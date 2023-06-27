@@ -1,12 +1,23 @@
 import pytest
 from datetime import timedelta, datetime
+from packaging.version import Version
 
 
 from aiorediantic import RedisClient, ExpireEnum, OldRedisVersionException
 from aiorediantic.base.redis_key import RedisKey
+from ..conftest import high_version
+
+
+use_version = Version(high_version)
+v7_0_0 = Version("7.0.0")
+v2_6_0 = Version("2.6.0")
 
 
 @pytest.mark.asyncio
+@pytest.mark.skipif(
+    use_version < v2_6_0,
+    reason="skip test because used version is below 2.6.0 redis version",
+)
 async def testPexpireatOperation_shouldReturn_1_whenKeyExists(
     redis_client: RedisClient,
 ) -> None:
@@ -27,6 +38,10 @@ async def testPexpireatOperation_shouldReturn_1_whenKeyExists(
 
 
 @pytest.mark.asyncio
+@pytest.mark.skipif(
+    use_version < v2_6_0,
+    reason="skip test because used version is below 2.6.0 redis version",
+)
 async def testPexpireatOperation_shouldReturn_0_whenKeyNotExists(
     redis_client: RedisClient,
 ) -> None:
@@ -45,6 +60,10 @@ async def testPexpireatOperation_shouldReturn_0_whenKeyNotExists(
 
 
 @pytest.mark.asyncio
+@pytest.mark.skipif(
+    use_version < v7_0_0,
+    reason="skip test because used version is below 2.6.0 redis version",
+)
 async def testPexpireatOperationWith_NX_Option_shouldReturn_1_whenKeyHasNoExpiry(
     redis_client: RedisClient,
 ) -> None:
@@ -67,6 +86,10 @@ async def testPexpireatOperationWith_NX_Option_shouldReturn_1_whenKeyHasNoExpiry
 
 
 @pytest.mark.asyncio
+@pytest.mark.skipif(
+    use_version < v7_0_0,
+    reason="skip test because used version is below 2.6.0 redis version",
+)
 async def testPexpireatOperationWith_NX_Option_shouldReturn_0_whenKeyHasExpiry(
     redis_client: RedisClient,
 ) -> None:
@@ -91,6 +114,10 @@ async def testPexpireatOperationWith_NX_Option_shouldReturn_0_whenKeyHasExpiry(
 
 
 @pytest.mark.asyncio
+@pytest.mark.skipif(
+    use_version < v7_0_0,
+    reason="skip test because used version is below 2.6.0 redis version",
+)
 async def testPexpireatOperationWith_XX_Option_shouldReturn_1_whenKeyHasExpiry(
     redis_client: RedisClient,
 ) -> None:
@@ -115,6 +142,10 @@ async def testPexpireatOperationWith_XX_Option_shouldReturn_1_whenKeyHasExpiry(
 
 
 @pytest.mark.asyncio
+@pytest.mark.skipif(
+    use_version < v7_0_0,
+    reason="skip test because used version is below 2.6.0 redis version",
+)
 async def testPexpireatOperationWith_XX_Option_shouldReturn_0_whenKeyHasNoExpiry(
     redis_client: RedisClient,
 ) -> None:
@@ -140,6 +171,10 @@ async def testPexpireatOperationWith_XX_Option_shouldReturn_0_whenKeyHasNoExpiry
 
 
 @pytest.mark.asyncio
+@pytest.mark.skipif(
+    use_version < v7_0_0,
+    reason="skip test because used version is below 2.6.0 redis version",
+)
 async def testPexpireatOperationWith_GT_Option_shouldReturn_1_whenNewExpiryIsGreaterThanCurrentOne(
     redis_client: RedisClient,
 ) -> None:
@@ -164,6 +199,10 @@ async def testPexpireatOperationWith_GT_Option_shouldReturn_1_whenNewExpiryIsGre
 
 
 @pytest.mark.asyncio
+@pytest.mark.skipif(
+    use_version < v7_0_0,
+    reason="skip test because used version is below 2.6.0 redis version",
+)
 async def testPexpireatOperationWith_GT_Option_shouldReturn_0_whenNewExpiryIsLessThanCurrentOne(
     redis_client: RedisClient,
 ) -> None:
@@ -188,6 +227,10 @@ async def testPexpireatOperationWith_GT_Option_shouldReturn_0_whenNewExpiryIsLes
 
 
 @pytest.mark.asyncio
+@pytest.mark.skipif(
+    use_version < v7_0_0,
+    reason="skip test because used version is below 2.6.0 redis version",
+)
 async def testPexpireatOperationWith_LT_Option_shouldReturn_1_whenNewExpiryIsLessThanCurrentOne(
     redis_client: RedisClient,
 ) -> None:
@@ -212,6 +255,10 @@ async def testPexpireatOperationWith_LT_Option_shouldReturn_1_whenNewExpiryIsLes
 
 
 @pytest.mark.asyncio
+@pytest.mark.skipif(
+    use_version < v7_0_0,
+    reason="skip test because used version is below 2.6.0 redis version",
+)
 async def testPexpireatOperationWith_LT_Option_shouldReturn_0_whenNewExpiryIsGreaterThanCurrentOne(
     redis_client: RedisClient,
 ) -> None:
@@ -248,7 +295,7 @@ async def testPexpireatOperation_shouldRaiseOldRedisVersionException_whenOptionN
     excepted = "Current version: 2.6.0 is not support options: NX, XX, GT and LT. Required version: 7.0.0"
     with pytest.raises(OldRedisVersionException, match=excepted):
         # Act
-        await obj.pexpireat(epoch_in_milliseconds=date_time)
+        await obj.pexpireat(epoch_in_milliseconds=date_time, option=ExpireEnum.LT)
 
 
 @pytest.mark.asyncio

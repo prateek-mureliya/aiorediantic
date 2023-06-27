@@ -51,7 +51,7 @@ class RedisKey(RedisModel):
         History
         Starting with Redis version 7.0.0: Added options: NX, XX, GT and LT.
         """
-        if self.redisVersion < version_7_0_0:
+        if option is not None and self.redisVersion < version_7_0_0:
             raise OldRedisVersionException(
                 f"Current version: {self.redisVersion} is not support options: NX, XX, GT and LT. Required version: {version_7_0_0}",
             )
@@ -86,7 +86,7 @@ class RedisKey(RedisModel):
         History
         Starting with Redis version 7.0.0: Added options: NX, XX, GT and LT.
         """
-        if self.redisVersion < version_7_0_0:
+        if option is not None and self.redisVersion < version_7_0_0:
             raise OldRedisVersionException(
                 f"Current version: {self.redisVersion} is not support options: NX, XX, GT and LT. Required version: {version_7_0_0}",
             )
@@ -126,7 +126,7 @@ class RedisKey(RedisModel):
                 f"Current version: {self.redisVersion} is not support PEXPIRE operation. Required version: {version_2_6_0}"
             )
 
-        if self.redisVersion < version_7_0_0:
+        if option is not None and self.redisVersion < version_7_0_0:
             raise OldRedisVersionException(
                 f"Current version: {self.redisVersion} is not support options: NX, XX, GT and LT. Required version: {version_7_0_0}",
             )
@@ -165,7 +165,7 @@ class RedisKey(RedisModel):
                 f"Current version: {self.redisVersion} is not support PEXPIREAT operation. Required version: {version_2_6_0}"
             )
 
-        if self.redisVersion < version_7_0_0:
+        if option is not None and self.redisVersion < version_7_0_0:
             raise OldRedisVersionException(
                 f"Current version: {self.redisVersion} is not support options: NX, XX, GT and LT. Required version: {version_7_0_0}",
             )

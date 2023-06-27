@@ -1,9 +1,15 @@
 import pytest
 from datetime import timedelta, datetime
+from packaging.version import Version
 
 
 from aiorediantic import RedisClient, ExpireEnum, OldRedisVersionException
 from aiorediantic.base.redis_key import RedisKey
+from ..conftest import high_version
+
+
+use_version = Version(high_version)
+v7_0_0 = Version("7.0.0")
 
 
 @pytest.mark.asyncio
@@ -45,6 +51,10 @@ async def testExpireatOperation_shouldReturn_0_whenKeyNotExists(
 
 
 @pytest.mark.asyncio
+@pytest.mark.skipif(
+    use_version < v7_0_0,
+    reason="skip test because used version is below 7.0.0 redis version",
+)
 async def testExpireatOperationWith_NX_Option_shouldReturn_1_whenKeyHasNoExpiry(
     redis_client: RedisClient,
 ) -> None:
@@ -65,6 +75,10 @@ async def testExpireatOperationWith_NX_Option_shouldReturn_1_whenKeyHasNoExpiry(
 
 
 @pytest.mark.asyncio
+@pytest.mark.skipif(
+    use_version < v7_0_0,
+    reason="skip test because used version is below 7.0.0 redis version",
+)
 async def testExpireatOperationWith_NX_Option_shouldReturn_0_whenKeyHasExpiry(
     redis_client: RedisClient,
 ) -> None:
@@ -87,6 +101,10 @@ async def testExpireatOperationWith_NX_Option_shouldReturn_0_whenKeyHasExpiry(
 
 
 @pytest.mark.asyncio
+@pytest.mark.skipif(
+    use_version < v7_0_0,
+    reason="skip test because used version is below 7.0.0 redis version",
+)
 async def testExpireatOperationWith_XX_Option_shouldReturn_1_whenKeyHasExpiry(
     redis_client: RedisClient,
 ) -> None:
@@ -109,6 +127,10 @@ async def testExpireatOperationWith_XX_Option_shouldReturn_1_whenKeyHasExpiry(
 
 
 @pytest.mark.asyncio
+@pytest.mark.skipif(
+    use_version < v7_0_0,
+    reason="skip test because used version is below 7.0.0 redis version",
+)
 async def testExpireatOperationWith_XX_Option_shouldReturn_0_whenKeyHasNoExpiry(
     redis_client: RedisClient,
 ) -> None:
@@ -132,6 +154,10 @@ async def testExpireatOperationWith_XX_Option_shouldReturn_0_whenKeyHasNoExpiry(
 
 
 @pytest.mark.asyncio
+@pytest.mark.skipif(
+    use_version < v7_0_0,
+    reason="skip test because used version is below 7.0.0 redis version",
+)
 async def testExpireatOperationWith_GT_Option_shouldReturn_1_whenNewExpiryIsGreaterThanCurrentOne(
     redis_client: RedisClient,
 ) -> None:
@@ -140,9 +166,9 @@ async def testExpireatOperationWith_GT_Option_shouldReturn_1_whenNewExpiryIsGrea
     obj: RedisKey = key(keyname="expireat-gt-key-greater-expiry")
     # set a key with expiry
     await obj.client.set(  # pyright: ignore
-        "expireat-gt-key-greater-expiry", "tempvalue", ex=2
+        "expireat-gt-key-greater-expiry", "tempvalue", ex=4
     )
-    date_time: datetime = datetime.now() + timedelta(seconds=4)
+    date_time: datetime = datetime.now() + timedelta(seconds=8)
 
     # Act
     actual: int = await obj.expireat(epoch_in_seconds=date_time, option=ExpireEnum.GT)
@@ -154,6 +180,10 @@ async def testExpireatOperationWith_GT_Option_shouldReturn_1_whenNewExpiryIsGrea
 
 
 @pytest.mark.asyncio
+@pytest.mark.skipif(
+    use_version < v7_0_0,
+    reason="skip test because used version is below 7.0.0 redis version",
+)
 async def testExpireatOperationWith_GT_Option_shouldReturn_0_whenNewExpiryIsLessThanCurrentOne(
     redis_client: RedisClient,
 ) -> None:
@@ -176,6 +206,10 @@ async def testExpireatOperationWith_GT_Option_shouldReturn_0_whenNewExpiryIsLess
 
 
 @pytest.mark.asyncio
+@pytest.mark.skipif(
+    use_version < v7_0_0,
+    reason="skip test because used version is below 7.0.0 redis version",
+)
 async def testExpireatOperationWith_LT_Option_shouldReturn_1_whenNewExpiryIsLessThanCurrentOne(
     redis_client: RedisClient,
 ) -> None:
@@ -198,6 +232,10 @@ async def testExpireatOperationWith_LT_Option_shouldReturn_1_whenNewExpiryIsLess
 
 
 @pytest.mark.asyncio
+@pytest.mark.skipif(
+    use_version < v7_0_0,
+    reason="skip test because used version is below 7.0.0 redis version",
+)
 async def testExpireatOperationWith_LT_Option_shouldReturn_0_whenNewExpiryIsGreaterThanCurrentOne(
     redis_client: RedisClient,
 ) -> None:
@@ -206,9 +244,9 @@ async def testExpireatOperationWith_LT_Option_shouldReturn_0_whenNewExpiryIsGrea
     obj: RedisKey = key(keyname="expireat-lt-key-greater-expiry")
     # set a key with expiry
     await obj.client.set(  # pyright: ignore
-        "expireat-lt-key-greater-expiry", "tempvalue", ex=2
+        "expireat-lt-key-greater-expiry", "tempvalue", ex=4
     )
-    date_time: datetime = datetime.now() + timedelta(seconds=4)
+    date_time: datetime = datetime.now() + timedelta(seconds=8)
 
     # Act
     actual: int = await obj.expireat(epoch_in_seconds=date_time, option=ExpireEnum.LT)
@@ -232,4 +270,4 @@ async def testExpireatOperation_shouldRaiseOldRedisVersionException_whenOptionNo
     excepted = "Current version: 2.6.0 is not support options: NX, XX, GT and LT. Required version: 7.0.0"
     with pytest.raises(OldRedisVersionException, match=excepted):
         # Act
-        await obj.expireat(epoch_in_seconds=date_time)
+        await obj.expireat(epoch_in_seconds=date_time, option=ExpireEnum.XX)
