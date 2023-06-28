@@ -3,7 +3,7 @@ import time as mod_time
 from datetime import timedelta, datetime
 
 
-from aioredis.client import ExpiryT, AbsExpiryT
+from aiorediantic.types import ExpiryT, AbsExpiryT
 from aiorediantic.utils import (
     timedetla_to_seconds,
     timedetla_to_milliseconds,

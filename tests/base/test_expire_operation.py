@@ -20,7 +20,7 @@ async def testExpireOperation_shouldReturn_1_whenKeyExists(
     key = RedisKey(redisClient=redis_client, keyFormat="{keyname}")
     obj: RedisKey = key(keyname="expire-key-exists")
     # set a key no expiry
-    await obj.client.set("expire-key-exists", "tempvalue")  # pyright: ignore
+    await obj.client.set(obj.redisKey, "tempvalue")  # pyright: ignore
 
     # Act
     actual: int = await obj.expire(seconds=timedelta(minutes=1))
@@ -60,7 +60,7 @@ async def testExpireOperationWith_NX_Option_shouldReturn_1_whenKeyHasNoExpiry(
     key = RedisKey(redisClient=redis_client, keyFormat="{keyname}")
     obj: RedisKey = key(keyname="expire-nx-key-no-expiry")
     # set a key with no expiry
-    await obj.client.set("expire-nx-key-no-expiry", "tempvalue")  # pyright: ignore
+    await obj.client.set(obj.redisKey, "tempvalue")  # pyright: ignore
 
     # Act
     actual: int = await obj.expire(seconds=2, option=ExpireEnum.NX)
@@ -133,7 +133,7 @@ async def testExpireOperationWith_XX_Option_shouldReturn_0_whenKeyHasNoExpiry(
     key = RedisKey(redisClient=redis_client, keyFormat="{keyname}")
     obj: RedisKey = key(keyname="expire-xx-key-no-expiry")
     # set a key with no expiry
-    await obj.client.set("expire-xx-key-no-expiry", "tempvalue")  # pyright: ignore
+    await obj.client.set(obj.redisKey, "tempvalue")  # pyright: ignore
 
     # Act
     actual: int = await obj.expire(seconds=2, option=ExpireEnum.XX)
@@ -144,7 +144,7 @@ async def testExpireOperationWith_XX_Option_shouldReturn_0_whenKeyHasNoExpiry(
     assert actual == expected
 
     # cleanup
-    await obj.delete()
+    await obj.client.delete(obj.redisKey)  # pyright: ignore
 
 
 @pytest.mark.asyncio

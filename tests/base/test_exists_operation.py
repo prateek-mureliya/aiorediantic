@@ -13,7 +13,7 @@ async def testExistsOperation_shouldReturn_1_whenKeyExists(
     key = RedisKey(redisClient=redis_client, keyFormat="{keyname}")
     obj: RedisKey = key(keyname="key-exists")
     # set a key
-    await obj.client.set("key-exists", "tempvalue", ex=5)  # pyright: ignore
+    await obj.client.set(obj.redisKey, "tempvalue", ex=5)  # pyright: ignore
 
     # Act
     actual: int = await obj.exists()

@@ -1,9 +1,9 @@
 from typing import List
 from .config import RedisScheme, RedisConfig
 from .base.redis_client import RedisClient
-from .string_model import StringModel
 from .enum import ExpireEnum
 from .exception import OldRedisVersionException, InvalidOptionsCombinationException
+from .string.string_model import StringModel
 
 __all__: List[str] = [
     # base

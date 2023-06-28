@@ -3,7 +3,7 @@ from pydantic import BaseModel
 import aioredis
 
 
-from ..config import RedisConfig, RedisScheme
+from aiorediantic import RedisConfig, RedisScheme
 
 
 class RedisClient(BaseModel):
@@ -50,4 +50,7 @@ class RedisClient(BaseModel):
             self._client = aioredis.from_url(  # pyright: ignore
                 self.config.scheme, **kwargs
             )
+            self._client.response_callbacks["EXPIRE"] = int  # type: ignore
+            self._client.response_callbacks["EXPIREAT"] = int  # type: ignore
+            self._client.response_callbacks["SET"] = str if self.config.decode_responses else bytes  # type: ignore
         return self._client

@@ -3,7 +3,7 @@ import pytest_asyncio
 
 from aiorediantic import RedisConfig, RedisClient
 
-conf = dict(host="127.0.0.1", decode_responses=True)
+conf = dict(host="127.0.0.1")
 high_version = "7.0.11"
 
 

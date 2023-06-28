@@ -13,7 +13,7 @@ async def testDeleteOperation_shouldReturn_1_whenKeyExists(
     key = RedisKey(redisClient=redis_client, keyFormat="{keyname}")
     obj: RedisKey = key(keyname="key-delete-exists")
     # set a key
-    await obj.client.set("key-delete-exists", "tempvalue")  # pyright: ignore
+    await obj.client.set(obj.redisKey, "tempvalue")  # pyright: ignore
 
     # Act
     actual: int = await obj.delete()

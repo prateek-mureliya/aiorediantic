@@ -1,11 +1,11 @@
-from typing import Any, Optional, List
-from aioredis.client import ExpiryT, AbsExpiryT, FieldT
+from typing import Optional, List
 from packaging.version import Version
 
 from .redis_model import RedisModel
-from ..enum import ExpireEnum
-from ..exception import OldRedisVersionException
-from ..utils import (
+from aiorediantic.types import ExpiryT, AbsExpiryT, FieldT
+from aiorediantic.enum import ExpireEnum
+from aiorediantic.exception import OldRedisVersionException
+from aiorediantic.utils import (
     timedetla_to_seconds,
     timedetla_to_milliseconds,
     unix_to_seconds,
@@ -60,11 +60,10 @@ class RedisKey(RedisModel):
         pieces: List[FieldT] = [seconds]
         if option:
             pieces.append(option.value)
-
-        status: Any = await self.client.execute_command(  # pyright: ignore
+        # self.redisClient._client.response_callbacks["EXPIRE"] = int  # type: ignore
+        return await self.client.execute_command(  # pyright: ignore
             "EXPIRE", self.redisKey, *pieces
         )
-        return 1 if status else 0
 
     async def expireat(
         self, epoch_in_seconds: AbsExpiryT, option: Optional[ExpireEnum] = None
@@ -96,10 +95,9 @@ class RedisKey(RedisModel):
         if option:
             pieces.append(option.value)
 
-        status: Any = await self.client.execute_command(  # pyright: ignore
+        return await self.client.execute_command(  # pyright: ignore
             "EXPIREAT", self.redisKey, *pieces
         )
-        return 1 if status else 0
 
     async def pexpire(
         self, milliseconds: ExpiryT, option: Optional[ExpireEnum] = None

@@ -1,6 +1,8 @@
-from aioredis.client import AbsExpiryT, ExpiryT
 import time as mod_time
 import datetime
+
+
+from aiorediantic.types import StrBytesT, AbsExpiryT, ExpiryT, OptionalStr
 
 
 def timedetla_to_seconds(seconds: ExpiryT) -> int:
@@ -28,3 +30,11 @@ def unix_to_milliseconds(epoch_in_milliseconds: AbsExpiryT) -> int:
             int(mod_time.mktime(epoch_in_milliseconds.timetuple())) * 1000 + ms
         )
     return epoch_in_milliseconds
+
+
+def str_if_byte(value: StrBytesT) -> OptionalStr:
+    return (
+        value.decode("utf-8", errors="replace")
+        if value is not None and isinstance(value, bytes)
+        else value
+    )

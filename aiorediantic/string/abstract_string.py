@@ -1,10 +1,10 @@
-from typing import Any, Optional, Union, List
-from aioredis.client import ExpiryT, FieldT, AbsExpiryT
+from typing import Any, Optional, List
 
 
-from .base.redis_key import RedisKey
-from .exception import InvalidOptionsCombinationException
-from .utils import (
+from aiorediantic.types import StrBytesT, ExpiryT, FieldT, AbsExpiryT
+from aiorediantic.base.redis_key import RedisKey
+from aiorediantic.exception import InvalidOptionsCombinationException
+from aiorediantic.utils import (
     timedetla_to_seconds,
     timedetla_to_milliseconds,
     unix_to_seconds,
@@ -18,12 +18,13 @@ class AbstractStringModel(RedisKey):
         value: Any,
         nx: bool = False,
         xx: bool = False,
+        get: bool = False,
         ex: Optional[ExpiryT] = None,
         px: Optional[ExpiryT] = None,
         exat: Optional[AbsExpiryT] = None,
         pxat: Optional[AbsExpiryT] = None,
         keepttl: bool = False,
-    ) -> Union[str, bool, None]:
+    ) -> StrBytesT:
         if nx and xx:
             raise InvalidOptionsCombinationException(
                 "NX and XX both can not be True together"
@@ -34,6 +35,8 @@ class AbstractStringModel(RedisKey):
             pieces.append("NX")
         if xx:
             pieces.append("XX")
+        if get:
+            pieces.append("GET")
 
         if ex is not None:
             pieces.append("EX")
@@ -63,7 +66,3 @@ class AbstractStringModel(RedisKey):
 
     async def getset(self, value: Any) -> Any:
         return await self.client.get(self.redisKey)  # pyright: ignore
-
-
-class StringModel(AbstractStringModel):
-    pass
