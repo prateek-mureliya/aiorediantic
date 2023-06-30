@@ -62,7 +62,7 @@ class RedisKey(RedisModel):
         pieces: List[FieldT] = [seconds]
         if option:
             pieces.append(option.value)
-        # self.redisClient._client.response_callbacks["EXPIRE"] = int  # type: ignore
+
         return await self.client.execute_command(  # pyright: ignore
             "EXPIRE", self.redisKey, *pieces
         )
@@ -184,9 +184,9 @@ class RedisKey(RedisModel):
         Returns the remaining time to live (in seconds) of a key that has a timeout.
 
         Return
-            an integer if key is present.
-            0 if the timeout was not set. e.g. key doesn't exist, or operation skipped due to the provided arguments.
-
+            ttl time as as an integer if key is present.
+            -1 if the key doesn't exist but has no associated ttl.
+            -2 if key is not present.
         History
         Starting with Redis version 2.8.0: Added -2 reply.
         """
@@ -195,12 +195,13 @@ class RedisKey(RedisModel):
 
     async def pttl(self) -> int:
         """
-        Returns the remaining time to live (in seconds) of a key that has a timeout.
+        @Available since: 2.6.0
+        Returns the remaining time to live (in milliseconds) of a key that has a timeout.
 
         Return
-            an integer if key is present.
-            0 if the timeout was not set. e.g. key doesn't exist, or operation skipped due to the provided arguments.
-
+            ttl time as as an integer if key is present.
+            -1 if the key doesn't exist but has no associated ttl.
+            -2 if key is not present.
         History
         Starting with Redis version 2.8.0: Added -2 reply.
         """
@@ -213,10 +214,12 @@ class RedisKey(RedisModel):
 
     async def unlink(self) -> int:
         """
+        @Available since: 4.0.0
         removes the specified keys asynchronously.
 
         Return
-            an integer (the no of keys unlinked).
+            0 when key does not exist.
+            1 when key is unlinked).
         """
         if self.redisVersion < version_4_0_0:
             raise OldRedisVersionException(
@@ -227,7 +230,7 @@ class RedisKey(RedisModel):
 
     async def persist(self) -> int:
         """
-        removes the ttl of specified keys.
+        removes the ttl of specified key.
 
         Return
             1 if key's ttl is removed

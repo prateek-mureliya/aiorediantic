@@ -3,12 +3,13 @@ import time as mod_time
 from datetime import timedelta, datetime
 
 
-from aiorediantic.types import ExpiryT, AbsExpiryT
+from aiorediantic.types import ExpiryT, AbsExpiryT, StrBytesT, StrReturn
 from aiorediantic.utils import (
     timedetla_to_seconds,
     timedetla_to_milliseconds,
     unix_to_seconds,
     unix_to_milliseconds,
+    str_if_byte,
 )
 
 
@@ -120,4 +121,35 @@ def testUnix_to_milliseconds_shouldPass_whenIntAndDatetimePassAsTime(
         excepted: int = time
 
     assert type(actual) == int
+    assert actual == excepted
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        None,
+        "OK",
+        "abc",
+        b"bytes",
+    ],
+)
+def testStr_if_byte_shouldPass(
+    value: StrBytesT,
+) -> None:
+    # Act
+    actual: StrReturn = str_if_byte(value)
+
+    # Assert
+    if isinstance(value, bytes):
+        excepted: StrReturn = value.decode("utf-8", errors="replace")
+    elif value is None:
+        excepted: StrReturn = False
+    else:
+        excepted: StrReturn = value
+
+    if value:
+        assert type(actual) == str
+    else:
+        assert type(actual) == bool
+
     assert actual == excepted

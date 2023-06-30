@@ -1,25 +1,31 @@
 from typing import Optional
 
 
-from aiorediantic import InvalidArgumentTypeException
-from aiorediantic.types import StrBytesT, AbsExpiryT, ExpiryT, StrReturn
+from aiorediantic import InvalidArgumentTypeException, UnexpectedReturnTypeException
+from aiorediantic.types import StrBytesT, AbsExpiryT, ExpiryT, FloatReturn, StrReturn
 from aiorediantic.utils import str_if_byte
 from .abstract_string import AbstractStringModel
 
 
-class StringModel(AbstractStringModel):
-    def _parse_res(self, value: StrBytesT, get: bool = True) -> StrReturn:
+class FloatModel(AbstractStringModel):
+    def _parse_res(self, value: StrBytesT, get: bool = True) -> FloatReturn:
         res: StrReturn = str_if_byte(value)
-        if type(res) == bool:
-            return res
+        try:
+            if type(res) == bool:
+                return res
 
-        if not get and res == "OK":
-            return True
-        return res
+            if not get and res == "OK":
+                return True
+
+            return float(res)
+        except:
+            raise UnexpectedReturnTypeException(
+                f"FloatModel expect FLOAT return type but get value {res}"
+            )
 
     async def set(
         self,
-        value: str,
+        value: float,
         nx: bool = False,
         xx: bool = False,
         get: bool = False,
@@ -28,16 +34,16 @@ class StringModel(AbstractStringModel):
         exat: Optional[AbsExpiryT] = None,
         pxat: Optional[AbsExpiryT] = None,
         keepttl: bool = False,
-    ) -> StrReturn:
+    ) -> FloatReturn:
         """
         @Available since: 1.0.0
-        Set key to hold the string value.
+        Set key to hold the float value.
 
         Return
-            OK if SET was executed correctly.
-            None if the SET operation was not performed because the user specified the NX or XX option but the condition was not met.
-            Old string value stored at key.If the command is issued with the GET option.
-            None if the key did not exist.
+            True if SET was executed correctly.
+            False if the SET operation was not performed because the user specified the NX or XX option but the condition was not met.
+            Old float value stored at key.If the command is issued with the GET option.
+            False if the key did not exist.
 
         The SET command supports a set of options that modify its behavior:
             EX seconds -- Set the specified expire time, in seconds.
@@ -47,7 +53,7 @@ class StringModel(AbstractStringModel):
             NX -- Only set the key if it does not already exist.
             XX -- Only set the key if it already exists.
             KEEPTTL -- Retain the time to live associated with the key.
-            GET -- Return the old string stored at key, or nil if key did not exist.
+            GET -- Return the old float stored at key, or nil if key did not exist.
 
         History
             Starting with Redis version 2.6.12: Added the EX, PX, NX and XX options.
@@ -55,9 +61,9 @@ class StringModel(AbstractStringModel):
             Starting with Redis version 6.2.0: Added the GET, EXAT and PXAT option.
             Starting with Redis version 7.0.0: Allowed the NX and GET options to be used together.
         """
-        if not isinstance(value, str):  # pyright: ignore
+        if type(value) != float:
             raise InvalidArgumentTypeException(
-                "StringModel allow to set only STRING value"
+                "FloatModel allow to set only FLOAT value"
             )
 
         status: StrBytesT = await super()._set(
@@ -74,26 +80,26 @@ class StringModel(AbstractStringModel):
 
         return self._parse_res(status, get=get)
 
-    async def get(self) -> StrReturn:
+    async def get(self) -> FloatReturn:
         """
         @Available since: 1.0.0
-        Get the string value of key.
+        Get the float value of key.
 
         Return
-            String value of key
-            None when key does not exist.
+            float value of key
+            False when key does not exist.
         """
         status: StrBytesT = await super()._get()
         return self._parse_res(status, get=True)
 
-    async def getdel(self) -> StrReturn:
+    async def getdel(self) -> FloatReturn:
         """
         @Available since: 6.2.0
-        Get the string value of key and delete the key.
+        Get the float value of key and delete the key.
 
         Return
-            String value of key
-            None when key does not exist.
+            float value of key
+            False when key does not exist.
         """
         status: StrBytesT = await super()._getdel()
         return self._parse_res(status, get=True)
