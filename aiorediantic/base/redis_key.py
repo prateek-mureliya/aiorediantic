@@ -15,6 +15,8 @@ from aiorediantic.utils import (
 
 version_7_0_0: Version = Version("7.0.0")
 version_2_6_0: Version = Version("2.6.0")
+version_4_0_0: Version = Version("4.0.0")
+version_2_2_0: Version = Version("2.2.0")
 
 
 class RedisKey(RedisModel):
@@ -176,3 +178,64 @@ class RedisKey(RedisModel):
         return await self.client.execute_command(  # pyright: ignore
             "PEXPIREAT", self.redisKey, *pieces
         )
+
+    async def ttl(self) -> int:
+        """
+        Returns the remaining time to live (in seconds) of a key that has a timeout.
+
+        Return
+            an integer if key is present.
+            0 if the timeout was not set. e.g. key doesn't exist, or operation skipped due to the provided arguments.
+
+        History
+        Starting with Redis version 2.8.0: Added -2 reply.
+        """
+
+        return await self.client.ttl(self.redisKey)  # pyright: ignore
+
+    async def pttl(self) -> int:
+        """
+        Returns the remaining time to live (in seconds) of a key that has a timeout.
+
+        Return
+            an integer if key is present.
+            0 if the timeout was not set. e.g. key doesn't exist, or operation skipped due to the provided arguments.
+
+        History
+        Starting with Redis version 2.8.0: Added -2 reply.
+        """
+        if self.redisVersion < version_2_6_0:
+            raise OldRedisVersionException(
+                f"Current version: {self.redisVersion} is not support PTTL operation. Required version: {version_2_6_0}"
+            )
+
+        return await self.client.pttl(self.redisKey)  # pyright: ignore
+
+    async def unlink(self) -> int:
+        """
+        removes the specified keys asynchronously.
+
+        Return
+            an integer (the no of keys unlinked).
+        """
+        if self.redisVersion < version_4_0_0:
+            raise OldRedisVersionException(
+                f"Current version: {self.redisVersion} is not support UNLINK operation. Required version: {version_4_0_0}"
+            )
+
+        return await self.client.unlink(self.redisKey)  # pyright: ignore
+
+    async def persist(self) -> int:
+        """
+        removes the ttl of specified keys.
+
+        Return
+            1 if key's ttl is removed
+            0 if key does not exist or ttl not removed
+        """
+        if self.redisVersion < version_2_2_0:
+            raise OldRedisVersionException(
+                f"Current version: {self.redisVersion} is not support PERSIST operation. Required version: {version_2_2_0}"
+            )
+
+        return await self.client.persist(self.redisKey)  # pyright: ignore
