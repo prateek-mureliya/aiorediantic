@@ -264,11 +264,14 @@ async def testPexpireOperation_shouldRaiseOldRedisVersionException_whenOptionNot
     key = RedisKey(redisClient=redis_client_2_6_0, keyFormat="{keyname}")
     obj: RedisKey = key(keyname="pexpire-key-use-old-version")
 
+    # Act
+    with pytest.raises(OldRedisVersionException) as exc_info:
+        await obj.pexpire(milliseconds=2, option=ExpireEnum.GT)
+
     # Assert
     excepted = "Current version: 2.6.0 is not support options: NX, XX, GT and LT. Required version: 7.0.0"
-    with pytest.raises(OldRedisVersionException, match=excepted):
-        # Act
-        await obj.pexpire(milliseconds=2, option=ExpireEnum.GT)
+    assert exc_info.type == OldRedisVersionException
+    assert exc_info.value.args[0] == excepted
 
 
 @pytest.mark.asyncio
@@ -279,8 +282,11 @@ async def testPexpireOperation_shouldRaiseOldRedisVersionException_whenOperation
     key = RedisKey(redisClient=redis_client_1_2_0, keyFormat="{keyname}")
     obj: RedisKey = key(keyname="pexpire-key-use-old-version")
 
+    # Act
+    with pytest.raises(OldRedisVersionException) as exc_info:
+        await obj.pexpire(milliseconds=2)
+
     # Assert
     excepted = "Current version: 1.2.0 is not support PEXPIRE operation. Required version: 2.6.0"
-    with pytest.raises(OldRedisVersionException, match=excepted):
-        # Act
-        await obj.pexpire(milliseconds=2)
+    assert exc_info.type == OldRedisVersionException
+    assert exc_info.value.args[0] == excepted

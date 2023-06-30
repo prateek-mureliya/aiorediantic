@@ -57,4 +57,5 @@ class RedisClient(BaseModel):
             self._client.response_callbacks["EXPIRE"] = int  # type: ignore
             self._client.response_callbacks["EXPIREAT"] = int  # type: ignore
             self._client.response_callbacks["SET"] = original_response  # type: ignore
+            self._client.response_callbacks["PERSIST"] = int  # type: ignore
         return self._client

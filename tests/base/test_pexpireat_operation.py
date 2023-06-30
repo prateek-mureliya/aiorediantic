@@ -291,11 +291,14 @@ async def testPexpireatOperation_shouldRaiseOldRedisVersionException_whenOptionN
     obj: RedisKey = key(keyname="pexpireat-key-use-old-version")
     date_time: datetime = datetime.now() + timedelta(seconds=2)
 
+    # Act
+    with pytest.raises(OldRedisVersionException) as exc_info:
+        await obj.pexpireat(epoch_in_milliseconds=date_time, option=ExpireEnum.LT)
+
     # Assert
     excepted = "Current version: 2.6.0 is not support options: NX, XX, GT and LT. Required version: 7.0.0"
-    with pytest.raises(OldRedisVersionException, match=excepted):
-        # Act
-        await obj.pexpireat(epoch_in_milliseconds=date_time, option=ExpireEnum.LT)
+    assert exc_info.type == OldRedisVersionException
+    assert exc_info.value.args[0] == excepted
 
 
 @pytest.mark.asyncio
@@ -307,8 +310,11 @@ async def testPexpireatOperation_shouldRaiseOldRedisVersionException_whenOperati
     obj: RedisKey = key(keyname="pexpireat-key-use-old-version")
     date_time: datetime = datetime.now() + timedelta(seconds=2)
 
+    # Act
+    with pytest.raises(OldRedisVersionException) as exc_info:
+        await obj.pexpireat(epoch_in_milliseconds=date_time)
+
     # Assert
     excepted = "Current version: 1.2.0 is not support PEXPIREAT operation. Required version: 2.6.0"
-    with pytest.raises(OldRedisVersionException, match=excepted):
-        # Act
-        await obj.pexpireat(epoch_in_milliseconds=date_time)
+    assert exc_info.type == OldRedisVersionException
+    assert exc_info.value.args[0] == excepted

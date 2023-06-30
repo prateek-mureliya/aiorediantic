@@ -266,8 +266,11 @@ async def testExpireatOperation_shouldRaiseOldRedisVersionException_whenOptionNo
     obj: RedisKey = key(keyname="expireat-key-use-old-version")
     date_time: datetime = datetime.now() + timedelta(seconds=2)
 
+    # Act
+    with pytest.raises(OldRedisVersionException) as exc_info:
+        await obj.expireat(epoch_in_seconds=date_time, option=ExpireEnum.XX)
+
     # Assert
     excepted = "Current version: 2.6.0 is not support options: NX, XX, GT and LT. Required version: 7.0.0"
-    with pytest.raises(OldRedisVersionException, match=excepted):
-        # Act
-        await obj.expireat(epoch_in_seconds=date_time, option=ExpireEnum.XX)
+    assert exc_info.type == OldRedisVersionException
+    assert exc_info.value.args[0] == excepted
