@@ -15,6 +15,13 @@ async def redis_client():
 
 
 @pytest_asyncio.fixture()  # pyright: ignore
+async def redis_client_6_2_0():
+    redis = RedisClient(config=RedisConfig.construct(redis_version="6.2.0", **conf))  # type: ignore
+    yield redis
+    await redis.client.close()
+
+
+@pytest_asyncio.fixture()  # pyright: ignore
 async def redis_client_2_6_0():
     redis = RedisClient(config=RedisConfig.construct(redis_version="2.6.0", **conf))  # type: ignore
     yield redis

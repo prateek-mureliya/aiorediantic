@@ -2,7 +2,7 @@ import time as mod_time
 import datetime
 
 
-from aiorediantic.types import StrBytesT, AbsExpiryT, ExpiryT, OptionalStr
+from aiorediantic.types import StrBytesT, AbsExpiryT, ExpiryT, StrReturn
 
 
 def timedetla_to_seconds(seconds: ExpiryT) -> int:
@@ -32,9 +32,12 @@ def unix_to_milliseconds(epoch_in_milliseconds: AbsExpiryT) -> int:
     return epoch_in_milliseconds
 
 
-def str_if_byte(value: StrBytesT) -> OptionalStr:
-    return (
-        value.decode("utf-8", errors="replace")
-        if value is not None and isinstance(value, bytes)
-        else value
-    )
+def str_if_byte(value: StrBytesT) -> StrReturn:
+    if value:
+        return (
+            value.decode("utf-8", errors="replace")
+            if isinstance(value, bytes)
+            else value
+        )
+    else:
+        return False

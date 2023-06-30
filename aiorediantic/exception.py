@@ -4,3 +4,11 @@ class OldRedisVersionException(Exception):
 
 class InvalidOptionsCombinationException(Exception):
     pass
+
+
+class InvalidArgumentTypeException(Exception):
+    pass
+
+
+class UnexpectedReturnTypeException(Exception):
+    pass

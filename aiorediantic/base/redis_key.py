@@ -60,7 +60,7 @@ class RedisKey(RedisModel):
         pieces: List[FieldT] = [seconds]
         if option:
             pieces.append(option.value)
-        # self.redisClient._client.response_callbacks["EXPIRE"] = int  # type: ignore
+
         return await self.client.execute_command(  # pyright: ignore
             "EXPIRE", self.redisKey, *pieces
         )
