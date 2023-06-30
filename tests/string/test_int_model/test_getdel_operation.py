@@ -60,6 +60,10 @@ async def testIntGetDelOperation_shouldReturnFalse_whenKeyNotExists(
 
 
 @pytest.mark.asyncio
+@pytest.mark.skipif(
+    use_version < v6_2_0,
+    reason="skip test because used version is below 6.2.0 redis version",
+)
 async def testIntGetDelOperation_shouldRaiseUnexpectedReturnTypeException_whenReturnValueTypeMismatch(
     redis_client: RedisClient,
 ) -> None:
@@ -69,15 +73,12 @@ async def testIntGetDelOperation_shouldRaiseUnexpectedReturnTypeException_whenRe
     await obj.client.set(obj.redisKey, 3.14)  # pyright: ignore
     # Act
     with pytest.raises(UnexpectedReturnTypeException) as exc_info:
-        await obj.get()
+        await obj.getdel()
 
     # Assert
     excepted = "IntModel expect INT return type but get value 3.14"
     assert exc_info.type == UnexpectedReturnTypeException
     assert exc_info.value.args[0] == excepted
-
-    # cleanup
-    await obj.client.delete(obj.redisKey)  # pyright: ignore
 
 
 @pytest.mark.asyncio

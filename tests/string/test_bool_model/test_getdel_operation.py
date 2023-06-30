@@ -81,7 +81,11 @@ async def testBoolGetDelOperation_shouldRaiseOldRedisVersionException_whenUseOld
 
 
 @pytest.mark.asyncio
-async def testBoolGetOperation_shouldRaiseUnexpectedReturnTypeException_whenReturnValueTypeMismatch(
+@pytest.mark.skipif(
+    use_version < v6_2_0,
+    reason="skip test because used version is below 6.2.0 redis version",
+)
+async def testBoolGetDelOperation_shouldRaiseUnexpectedReturnTypeException_whenReturnValueTypeMismatch(
     redis_client: RedisClient,
 ) -> None:
     # Arrange
@@ -90,12 +94,9 @@ async def testBoolGetOperation_shouldRaiseUnexpectedReturnTypeException_whenRetu
     await obj.client.set(obj.redisKey, 789)  # pyright: ignore
     # Act
     with pytest.raises(UnexpectedReturnTypeException) as exc_info:
-        await obj.get()
+        await obj.getdel()
 
     # Assert
     excepted = "BoolModel expect BOOL return type but get value 789"
     assert exc_info.type == UnexpectedReturnTypeException
     assert exc_info.value.args[0] == excepted
-
-    # cleanup
-    await obj.client.delete(obj.redisKey)  # pyright: ignore
